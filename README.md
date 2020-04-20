@@ -17,7 +17,7 @@ Before running the code:
 
 6. Open the main python file
 
-7. On line 32 add the id for the YouTube playlist
+7. On line 32 add the id for the YouTube playlist. It needs to be an already existing playlist 
 
 8. On line 42 add the id for the Spotify playlist
 
