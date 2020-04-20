@@ -32,3 +32,5 @@ To set up the Spotify API follow this quickstart link: https://developer.spotify
 To connect to the Spotify API it uses the Tekore packages: https://pypi.org/project/tekore/
 
 Note: from testing on the google console API you can only add about 60 songs on to the playlist a day if the app is unauthorised that equates to about 250 requests if the app is unauthorised. It resets daily at midnight PDT.
+
+Video of the program execution: https://www.reddit.com/r/Python/comments/g51467/python_program_to_convert_spotify_playlist_into/
