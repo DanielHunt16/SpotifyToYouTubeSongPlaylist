@@ -1,7 +1,7 @@
 # SpotifyToYouTubeSongPlaylist
 Gets your Spotify Playlist with all the songs and adds it to a youtube playlist 
 
-!!THIS IS JUST A SCRIPT YOU WILL STILL NEED TO SETUP THE SPOTIFY API AND YOUTUBE API!!
+THIS IS JUST A SCRIPT YOU WILL STILL NEED TO SETUP THE SPOTIFY API AND YOUTUBE API
 
 Before running the code 
 
