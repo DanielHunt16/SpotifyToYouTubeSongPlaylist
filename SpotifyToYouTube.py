@@ -35,13 +35,13 @@ attempts = 0
 
 
 #  Gets the name and artist of the songs in a spotify playlist and stores it in variable
-def GetSongSpotify(app_token):
+def get_song_spotify(app_token):
     global loopnum
     global attempts
     spotify = Spotify(app_token)
     playlist = spotify.playlist('')  # Spotify pLaylist id goes here
-    WhileLoop = True
-    while WhileLoop:
+    while_loop = True
+    while while_loop:
         try:
             track = spotify.playlist_tracks(playlist.id).items[loopnum].track
             song = track.name
@@ -50,15 +50,15 @@ def GetSongSpotify(app_token):
             artist = artist.name
             full = str(song) + ' by ' + str(artist)
             print(str(loopnum + 1) + '. ' + full)
-            GetSongYouTube(full)
+            get_song_youtube(full)
 
         except IndexError:
-            WhileLoop = False
+            while_loop = False
             print("Completed Successfully")
 
 
 # searches the name of the song by the artist and get the first video on the lists id
-def GetSongYouTube(full):
+def get_song_youtube(full):
     request = youtube.search().list(
         part="snippet",
         maxResults=1,
@@ -70,12 +70,12 @@ def GetSongYouTube(full):
     response = response[0]
     response = response.get("id")
     videoid = response.get("videoId")
-    time.sleep(3)
-    PlaceInPlaylist(videoid, playlistid,full)
+    time.sleep(1)
+    place_in_playlist(videoid, playlistid, full)
 
 
 # Using the id from the previous function places that in the playlist
-def PlaceInPlaylist(videoid, playlistid, full):
+def place_in_playlist(videoid, playlistid, full):
     global loopnum
     global attempts
     request = youtube.playlistItems().insert(
@@ -111,4 +111,4 @@ def PlaceInPlaylist(videoid, playlistid, full):
             pass
 
 
-GetSongSpotify(app_token)
+get_song_spotify(app_token)
