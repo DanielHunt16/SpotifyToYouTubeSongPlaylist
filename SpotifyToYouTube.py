@@ -29,7 +29,7 @@ client_id = str(client_codes["client_id"])
 client_secret = str(client_codes["client_secret"])
 
 app_token = request_client_token(client_id, client_secret)
-playlistid = ""  # YouTube Playlist id goes here
+playlistid = input("enter youtube playlist id")  # YouTube Playlist id goes here
 loopnum = 0
 attempts = 0
 
@@ -39,7 +39,7 @@ def get_song_spotify(app_token):
     global loopnum
     global attempts
     spotify = Spotify(app_token)
-    playlist = spotify.playlist('')  # Spotify pLaylist id goes here
+    playlist = spotify.playlist(input("enter spotify playlist id"))  # Spotify pLaylist id goes here
     while_loop = True
     while while_loop:
         try:
