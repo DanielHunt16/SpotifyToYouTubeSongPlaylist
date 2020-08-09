@@ -41,7 +41,7 @@ Video of the program execution: https://www.reddit.com/r/Python/comments/g51467/
 
 ## Versions: 
 
-**Does not work with tekore version 2.0.0 and up. (Was built around version 1.7.0) **
+**Does not work with tekore version 2.0.0 and up. (Was built around version 1.7.0)**
 
 Works with current latest version of:
 google-api-core (1.22.0)
