@@ -1,6 +1,5 @@
 # Before running the code read the README
-from tekore.util import request_client_token
-from tekore import Spotify, util, scope
+from tekore import Spotify, request_client_token, scope
 import os
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
@@ -9,55 +8,71 @@ import time
 import json
 
 scopes = ["https://www.googleapis.com/auth/youtube.force-ssl"]
-
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 api_service_name = "youtube"
 api_version = "v3"
 client_secrets_file = "client_secret_YouTube.json"
 
 # Get credentials and create an API client
-flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
-    client_secrets_file, scopes)
+flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(client_secrets_file, scopes)
 credentials = flow.run_console()
-youtube = googleapiclient.discovery.build(
-    api_service_name, api_version, credentials=credentials)
+youtube = googleapiclient.discovery.build(api_service_name, api_version, credentials=credentials)
 
 with open("client_codes_Spotify.json") as f:
     client_codes = json.load(f)
 
+# Initializes Spotify API client codes 
 client_id = str(client_codes["client_id"])
 client_secret = str(client_codes["client_secret"])
-
 app_token = request_client_token(client_id, client_secret)
-playlistid = input("enter youtube playlist id")  # YouTube Playlist id goes here
-loopnum = 0
+#playlist_id_youtube = input("Enter the YouTube id")
+playlist_id_youtube = "PLfJ_OM_efucrscpVbgJltoGhO1eSFfVPj"
 attempts = 0
 
 
-#  Gets the name and artist of the songs in a spotify playlist and stores it in variable
+# Gets the name of the song and the artist from a spotify playlist
 def get_song_spotify(app_token):
-    global loopnum
     global attempts
     spotify = Spotify(app_token)
-    playlist = spotify.playlist(input("enter spotify playlist id"))  # Spotify pLaylist id goes here
-    while_loop = True
-    while while_loop:
-        try:
-            track = spotify.playlist_tracks(playlist.id).items[loopnum].track
-            song = track.name
-            artist = track.artists
-            artist = artist[0]
-            artist = artist.name
-            full = str(song) + ' by ' + str(artist)
-            print(str(loopnum + 1) + '. ' + full)
-            get_song_youtube(full)
+    #playlist_id_spotify = input("Enter the spotify playlist id")
+    playlist_id_spotify = "5EKf2UHdSIDE5oi8STVA8B"
+    playlist = spotify.playlist_items(playlist_id_spotify, as_tracks=True)
+    print(playlist)
+    playlist = playlist["items"]
+    print(playlist)
+    try:
+        i = 0
+        songIds = []
+        whileLoop = True
+        
+        # Gets the song ids from the returned dictionary
+        while whileLoop:
+            subPlaylist = playlist[i]
+            subPlaylist.pop("added_at", None)
+            subPlaylist.pop("added_by", None)
+            subPlaylist.pop("is_local", None)
+            subPlaylist.pop("primary_color", None)
+            subPlaylist = subPlaylist["track"]
+            subPlaylist.pop("album", None)
+            subPlaylist.pop("artists", None)
+            subPlaylist.pop("available_markets", None)
+            subPlaylist = subPlaylist["id"]
+            print(subPlaylist)
+            songIds.append(subPlaylist)
+            i += 1
 
-        except IndexError:
-            while_loop = False
-            print("Completed Successfully")
+    except IndexError:
+        pass
+
+    for i in range(len(songIds)):
+        track = spotify.track(songIds[i], market=None)
+        artist = track.artists
+        artist = artist[0]
+        print(f"{track.name} by {artist.name}")
+        get_song_youtube(f"{track.name} by {artist.name}")
 
 
-# searches the name of the song by the artist and get the first video on the lists id
+# Searches the name of the song by the artist and get the first video on the lists id
 def get_song_youtube(full):
     request = youtube.search().list(
         part="snippet",
@@ -71,12 +86,11 @@ def get_song_youtube(full):
     response = response.get("id")
     videoid = response.get("videoId")
     time.sleep(1)
-    place_in_playlist(videoid, playlistid, full)
+    place_in_playlist(videoid, playlist_id_youtube, full)
 
 
 # Using the id from the previous function places that in the playlist
 def place_in_playlist(videoid, playlistid, full):
-    global loopnum
     global attempts
     request = youtube.playlistItems().insert(
         part="snippet",
@@ -94,7 +108,6 @@ def place_in_playlist(videoid, playlistid, full):
 
     try:
         response = request.execute()
-        loopnum += 1
         attempts = 0
 
     except googleapiclient.errors.HttpError as e:
@@ -105,8 +118,6 @@ def place_in_playlist(videoid, playlistid, full):
             with open("response.txt", "w") as f1:
                 f1.write(str(full))
                 f1.write("\n")
-
-            loopnum += 1
         else:
             pass
 
