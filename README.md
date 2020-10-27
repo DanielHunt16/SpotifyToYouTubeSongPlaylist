@@ -17,7 +17,7 @@ Gets your Spotify Playlist with all the songs and adds it to a youtube playlist
 
 6. Run the python file.
 
-7.When it runs go to the link and authorise the app and then copy the code into the program
+7.When it runs go to the link and authorise the app and then copy the code into the program.
 
 8. When it asks for the YouTube id go to YouTube and got to a pre existing playlist and copy the url after "list=" and enter it.
 
@@ -41,17 +41,22 @@ Video of the program execution: https://www.reddit.com/r/Python/comments/g51467/
 
 ## Versions: 
 
-**Does not work with tekore version 2.0.0 and up. (Was built around version 1.7.0)**
-
 Works with current latest version of:
-google-api-core (1.22.0)
-google-api-python-client (1.10.0)
-google-auth (1.20.1)
-google-auth-httplib2 (0.0.4)
-google-auth-oauthlib(0.4.1)
 
-Python: 3.8
+Tekore 2.0.0 and up (currently tested up to 3.3.0 as of 27-10-2020)
+
+google-api-core 1.22.0
+
+google-api-python-client 1.10.0
+
+google-auth 1.20.1
+
+google-auth-httplib2 0.0.4
+
+google-auth-oauthlib 0.4.1
+
+Python 3.8
 
 ## Errors 
 
-If you get: ModuleNotFoundError: No module named 'tekore.util' Then check using pip list that tekore is version is 1.7 or lower. 
+If you get: AttributeError: 'Spotify' object has no attribute 'playlist_items' Then check that tekore version is atleast 2.0.0 or higher 
