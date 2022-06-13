@@ -10,6 +10,10 @@ import json
 import os
 from googleapiclient.errors import HttpError
 from http_requests import prevent_429
+import arrow
+from song import Song
+
+from playlist import Playlist
 
 
 class User:
@@ -18,6 +22,15 @@ class User:
     def auth_youtube(self):
         """initialize and authenticate with Youtube"""
         # Get credentials and create an API client
+        # check if the cache is recent enough to use
+        refresh_token = None
+        if os.path.exists("youtube_auth_cache.json"):
+            with open("youtube_auth_cache.json") as f:
+                cache = json.load(f)
+                if (arrow.get(cache["last_updated"]) - arrow.now()).days < 7:
+
+                    refresh_token = cache["refresh_token"]
+
         port = os.environ.get("PORT", 8080)
         flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
             self.client_secrets_file, self.scopes
@@ -30,9 +43,17 @@ class User:
 
             credentials = flow.run_local_server(port=port)
 
-        return googleapiclient.discovery.build(
+        auth = googleapiclient.discovery.build(
             self.api_service_name, self.api_version, credentials=credentials
         )
+
+        with open("youtube_auth_cache.json", "w") as f:
+
+            keys = [_attr for _attr in dir(credentials) if not _attr.startswith("_")]
+            auth_dict = {key: str(getattr(credentials, key)) for key in keys}
+            auth_dict["last_updated"] = arrow.now().isoformat()
+            json.dump(auth_dict, f)
+        return auth
 
     def __init__(
         self,
@@ -58,5 +79,66 @@ class User:
         )
         self.spotify = Spotify(self.app_token)
         self.youtube = self.auth_youtube()
-        self.playlists = self.spotify.playlists(self.spotify_user_id)
-        self.spotify_playlist_ids = [playlist.id for playlist in self.playlists.items]
+        if os.path.exists("spotify_playlist_cache.json"):
+            with open("spotify_playlist_cache.json") as f:
+                try:
+                    playlists = json.load(f)
+                except Exception:
+                    playlists = {}
+                if (
+                    len(playlists) > 1
+                    and (arrow.get(playlists.get("last_updated")) - arrow.now()).days
+                    < 7
+                ):
+                    self.playlists = playlists
+                    self.spotify_playlist_ids = [
+                        playlist["item"]["id"] for playlist in self.playlists["items"]
+                    ]
+
+        else:
+            self.playlists = self._get_current_spotify()
+
+    def _get_current_spotify(self):  # sourcery skip: dict-assign-update-to-union
+        next_page = True
+        limit = 50
+        offset = 0
+        playlists = {"playlists": []}
+
+        while next_page:
+            pl = self.spotify.playlists(
+                self.spotify_user_id, limit=limit, offset=offset
+            )
+            pl_json = json.loads(pl.json())
+
+            if pl.offset + limit >= pl.total:
+                next_page = False
+            playlists["playlists"].extend(pl_json["items"])
+            offset += limit
+        self.spotify_playlist_ids = [
+            playlist["id"] for playlist in playlists["playlists"]
+        ]
+
+        for pl in playlists["playlists"]:
+            tracks = []
+            playlist = Playlist(spotify_id=pl["id"], spotify=self.spotify)
+
+            for tune in playlist.tracks:
+                song = Song(
+                    spotify_playlist_id=pl["id"],
+                    spotify=self.spotify,
+                    spotify_meta_data=tune,
+                )
+                tracks.append(
+                    {
+                        "artist_name": song.artist_name,
+                        "track_name": song.track_name,
+                        "album_name": song.album_name,
+                        "track_id": pl["id"],
+                    }
+                )
+            pl["tracks"] = tracks
+
+        with open("spotify_playlist_cache.json", "w") as f:
+            playlists["last_updated"] = arrow.now().isoformat()
+            json.dump(playlists, f)
+        return playlists

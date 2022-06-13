@@ -23,23 +23,20 @@ class Playlist:
         self.name = self.spotify_playlist.name
         self.youtube = youtube
         self.youtube_id = None
-        self.youtube_playlist_id = youtube_playlists.create(name=self.name)
+        try:
+            self.youtube_playlist_id = youtube_playlists.create(name=self.name)
+        except AttributeError:
+            self.youtube_playlist_id = None
         self.spotify = spotify
 
     def place_songs_in_playlist(self):
         for tune in self.tracks:
-            names = tune.track.artists
-            if len(names) > 1:
-                artist_name = f"{names[0].name} featuring {names[1].name}"
-            else:
-                artist_name = names[0].name
 
             song = Song(
                 spotify_playlist_id=self.spotify_id,
                 playlist_id_youtube=self.youtube_id,
                 youtube=self.youtube,
-                artist_name=artist_name,
-                track_name=tune.track.name,
+                spotify_metadata=tune,
                 spotify=self.spotify,
             )
             song_youtube_id = song.get_song_youtube()

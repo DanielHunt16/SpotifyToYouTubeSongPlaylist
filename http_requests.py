@@ -14,5 +14,5 @@ def prevent_429(func, time_to_wait=1, **kwargs):
             time_to_wait = time_to_wait * 2
             print(f"Sleeping for {time_to_wait} seconds")
             time.sleep(time_to_wait)
-            # if any key is pressed, break the loop
+
             return prevent_429(func, time_to_wait, **kwargs)

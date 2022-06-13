@@ -16,22 +16,26 @@ class Song:
 
     def __init__(
         self,
+        spotify_meta_data,
         spotify_playlist_id=None,
         playlist_id_youtube=None,
         youtube=None,
         spotify=None,
-        **kwargs,
     ):
         """initializer doc string"""
-
+        names = spotify_meta_data.track.artists
+        if len(names) > 1:
+            self.artist_name = f"{names[0].name} featuring {names[1].name}"
+        else:
+            self.artist_name = names[0].name
         self.spotify_playlist_id = spotify_playlist_id
         self.playlist_id_youtube = playlist_id_youtube
         self.youtube = youtube
         self.spotify = spotify
-        self.track_name = kwargs.get("track_name")
-        self.artist_name = kwargs.get("artist_name")
+        self.track_name = spotify_meta_data.track.name
         self.full_name = f"{self.track_name} - {self.artist_name}"
         self.video_id = None
+        self.album_name = spotify_meta_data.track.album.name
 
     def get_songs_spotify(self):
         """Gets the songs from a spotify playlist"""
